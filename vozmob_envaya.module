@@ -10,30 +10,28 @@ function vozmob_envaya_sms_incoming($op, $number, $message, $options)  {
     node_object_prepare($node);
     watchdog('debug', 'sms_envaya_action: ' . print_r($options['sms_envaya_action'], TRUE));
     foreach ($options['sms_envaya_action']->mms_parts as $mms_part) {
-      if (strpos($mms_part->type, 'image') === 0) {
-        $images[] = file_save_upload($mms_part->form_name, array(), 'public://', FILE_EXISTS_RENAME);
+      if (file_get_mimetype($mms_part->filename) == 'application/octet-stream') {
+        $mapping = file_default_mimetype_mapping();
+        $mapping['mimetypes'] = array_flip($mapping['mimetypes']);
+        $mapping['extensions'] = array_flip($mapping['extensions']);
+        if (isset($mapping['mimetypes'][$mms_part->type])) {
+          $_FILES['files']['name'][$mms_part->form_name] .= '.' . $mapping['extensions'][$mapping['mimetypes'][$mms_part->type]];
+        }
+      }
+      if ($file = file_save_upload($mms_part->form_name, array('file_validate_extensions' => array('jpg jpeg gif png 3gp m4a wav m4v 3g2 bmp amr mpeg 3gpp qcelp qcp mp4 txt smil')), 'public://', FILE_EXISTS_RENAME)) {
+        $files[] = $file;
       }
       else {
-        $files[] = file_save_upload($mms_part->form_name, array('file_validate_extensions' => array('jpg', 'jpeg', 'gif', 'png', '3gp', 'm4a','wav','m4v', '3g2', 'bmp', 'amr', 'mpeg', '3gpp', 'qcelp', 'qcp', 'mp4', 'txt', 'smil')), 'public://', FILE_EXISTS_RENAME);
+        watchdog('vozmob_envaya', 'file_save_upload() failed for %mms_part.', array('%mms_part' => print_r($mms_part, TRUE)), WATCHDOG_ERROR);
       }
     }
     $node->title = $message;
     $node->uid = $user->uid;
     $node->status = 1;
     $node->language = LANGUAGE_NONE;
-    foreach ($images as $file) {
-      $node->field_image[$node->language][] = array(
-        'display' => 1,
-        'fid' => $file->fid,
-        'filename' => $file->filename,
-        'filemime' => $file->filemime,
-        'uid' => 1,
-        'uri' => $file->uri,
-        'status' => 1,
-      );
-    }
     foreach ($files as $file) {
-      $node->field_file[$node->language][] = array(
+      $field = (strpos($file->filemime, 'image') === 0) ? 'field_image' : 'field_file';
+      $node->{$field}[$node->language][] = array(
         'display' => 1,
         'fid' => $file->fid,
         'filename' => $file->filename,
