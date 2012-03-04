@@ -1,0 +1,6 @@
+name = "VozMob Envaya"
+description = "Receive content via EnvayaSMS."
+package = VozMob
+core = 7.x
+files[] = vozmob_envaya.module
+dependencies[] = sms_envaya

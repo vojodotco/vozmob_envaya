@@ -1,0 +1,51 @@
+<?php
+
+/**
+ * Implements hook_sms_incoming().
+ */
+function vozmob_envaya_sms_incoming($op, $number, $message, $options)  {
+  global $user;
+  if ($op == 'process') {
+    $node->type = 'article';
+    node_object_prepare($node);
+    watchdog('debug', 'sms_envaya_action: ' . print_r($options['sms_envaya_action'], TRUE));
+    foreach ($options['sms_envaya_action']->mms_parts as $mms_part) {
+      if (strpos($mms_part->type, 'image') === 0) {
+        $images[] = file_save_upload($mms_part->form_name, array(), 'public://', FILE_EXISTS_RENAME);
+      }
+      else {
+        $files[] = file_save_upload($mms_part->form_name, array('file_validate_extensions' => array('jpg', 'jpeg', 'gif', 'png', '3gp', 'm4a','wav','m4v', '3g2', 'bmp', 'amr', 'mpeg', '3gpp', 'qcelp', 'qcp', 'mp4', 'txt', 'smil')), 'public://', FILE_EXISTS_RENAME);
+      }
+    }
+    $node->title = $message;
+    $node->uid = $user->uid;
+    $node->status = 1;
+    $node->language = LANGUAGE_NONE;
+    foreach ($images as $file) {
+      $node->field_image[$node->language][] = array(
+        'display' => 1,
+        'fid' => $file->fid,
+        'filename' => $file->filename,
+        'filemime' => $file->filemime,
+        'uid' => 1,
+        'uri' => $file->uri,
+        'status' => 1,
+      );
+    }
+    foreach ($files as $file) {
+      $node->field_file[$node->language][] = array(
+        'display' => 1,
+        'fid' => $file->fid,
+        'filename' => $file->filename,
+        'filemime' => $file->filemime,
+        'uid' => 1,
+        'uri' => $file->uri,
+        'status' => 1,
+      );
+    }
+    $node->body[$node->language][0]['value'] = $message;
+    $node->body[$node->language][0]['summary'] = text_summary($message);
+    $node->body[$node->language][0]['format'] = 'filtered_html';
+    node_save($node);
+  }
+}
