@@ -27,7 +27,6 @@ function vozmob_envaya_sms_incoming($op, $number, $message, $options)  {
     }
     $node->title = $message;
     $node->uid = $user->uid;
-    $node->status = 1;
     $node->language = LANGUAGE_NONE;
     foreach ($files as $file) {
       $field = (strpos($file->filemime, 'image') === 0) ? 'field_image' : 'field_file';
