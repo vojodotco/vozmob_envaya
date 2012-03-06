@@ -8,8 +8,9 @@ function vozmob_envaya_sms_incoming($op, $number, $message, $options)  {
   if ($op == 'process') {
     $node->type = 'article';
     node_object_prepare($node);
-    watchdog('vozmob_envaya', 'sms_envaya_action: %sms_envaya_action', array('%sms_envaya_action' => print_r($options['sms_envaya_action'], TRUE)));
+    watchdog('vozmob_envaya', nl2br(check_plain(print_r($options['sms_envaya_action'], TRUE))), NULL);
     $files = array();
+    $allowed_extensions = '3g2 3gp 3gpp amr avi bmp gif jpeg jpg png m4a m4v mp3 mp4 mpeg mpg qcelp qcp smil txt wav wbmp';
     foreach ((array) $options['sms_envaya_action']->mms_parts as $mms_part) {
       if (file_get_mimetype($mms_part->filename) == 'application/octet-stream') {
         $mapping = file_default_mimetype_mapping();
@@ -19,7 +20,9 @@ function vozmob_envaya_sms_incoming($op, $number, $message, $options)  {
           $_FILES['files']['name'][$mms_part->form_name] .= '.' . $mapping['extensions'][$mapping['mimetypes'][$mms_part->type]];
         }
       }
-      if ($file = file_save_upload($mms_part->form_name, array('file_validate_extensions' => array('jpg jpeg gif png 3gp m4a wav m4v 3g2 bmp amr mpeg 3gpp qcelp qcp mp4 txt smil')), 'public://', FILE_EXISTS_RENAME)) {
+      $directory = 'public://' . gmdate('Y/m/d');
+      file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+      if ($file = file_save_upload($mms_part->form_name, array('file_validate_extensions' => array($allowed_extensions)), $directory, FILE_EXISTS_RENAME)) {
         $files[] = $file;
       }
       else {
