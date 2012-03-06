@@ -10,7 +10,7 @@ function vozmob_envaya_sms_incoming($op, $number, $message, $options)  {
     node_object_prepare($node);
     watchdog('vozmob_envaya', 'sms_envaya_action: %sms_envaya_action', array('%sms_envaya_action' => print_r($options['sms_envaya_action'], TRUE)));
     $files = array();
-    foreach ($options['sms_envaya_action']->mms_parts as $mms_part) {
+    foreach ((array) $options['sms_envaya_action']->mms_parts as $mms_part) {
       if (file_get_mimetype($mms_part->filename) == 'application/octet-stream') {
         $mapping = file_default_mimetype_mapping();
         $mapping['mimetypes'] = array_flip($mapping['mimetypes']);
