@@ -18,7 +18,7 @@ function vozmob_envaya_sms_incoming($op, $number, $message, $options)  {
   $node->body[$node->language][0]['summary'] = text_summary($message);
   $node->body[$node->language][0]['value'] = $message;
   if ($options['sms_envaya_action']->mms_parts) {
-    $allowed_extensions = '3g2 3gp 3gpp amr avi bmp gif jpeg jpg png m4a m4v mp3 mp4 mpeg mpg qcelp qcp smil txt wav wbmp';
+    $allowed_extensions = '3g2 3gp 3gpp amr avi bmp gif jpeg jpg m4a m4v mp3 mp4 mpeg mpg png qcelp qcp smil txt wav wbmp';
     $directory = 'public://' . gmdate('Y/m/d');
     file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     foreach ($options['sms_envaya_action']->mms_parts as $mms_part) {
@@ -32,7 +32,7 @@ function vozmob_envaya_sms_incoming($op, $number, $message, $options)  {
       }
       $file = file_save_upload($mms_part->form_name, array('file_validate_extensions' => array($allowed_extensions)), $directory, FILE_EXISTS_RENAME);
       if ($file) {
-        $field = (strpos($file->filemime, 'image') === 0) ? 'field_image' : 'field_file';
+        $field = preg_match('!^image/(gif|jpeg|png)$!', $file->filemime) ? 'field_image' : 'field_file';
         $node->{$field}[$node->language][] = array(
           'display' => 1,
           'fid' => $file->fid,
