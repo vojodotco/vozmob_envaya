@@ -11,14 +11,14 @@ function vozmob_envaya_sms_incoming($op, $number, $message, $options)  {
   watchdog('vozmob_envaya', '<pre>' . check_plain(print_r($options['sms_envaya_action'], TRUE)) . '</pre>', NULL);
   $node->type = 'article';
   node_object_prepare($node);
-  $node->title = $message;
+  $node->title = truncate_utf8($message, 255, TRUE, TRUE, 60);
   $node->uid = $user->uid;
   $node->language = LANGUAGE_NONE;
   $node->body[$node->language][0]['format'] = 'filtered_html';
   $node->body[$node->language][0]['summary'] = text_summary($message);
   $node->body[$node->language][0]['value'] = $message;
   if ($options['sms_envaya_action']->mms_parts) {
-    $allowed_extensions = '3g2 3gp 3gpp amr avi bmp gif jpeg jpg m4a m4v mp3 mp4 mpeg mpg png qcelp qcp smil txt wav wbmp';
+    $allowed_extensions = '3g2 3gp 3gpp amr asc avi bmp gif jpeg jpg m4a m4v mp3 mp4 mpeg mpg png qcelp qcp smil txt wav wbmp';
     $directory = 'public://' . gmdate('Y/m/d');
     file_prepare_directory($directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     foreach ($options['sms_envaya_action']->mms_parts as $mms_part) {
