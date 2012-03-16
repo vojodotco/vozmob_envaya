@@ -11,7 +11,7 @@ function vozmob_envaya_sms_incoming($op, $number, $message, $options)  {
   watchdog('vozmob_envaya', '<pre>' . check_plain(print_r($options['sms_envaya_action'], TRUE)) . '</pre>', NULL);
   $node->type = 'article';
   node_object_prepare($node);
-  $node->title = truncate_utf8($message, 255, TRUE, TRUE, 60);
+  $node->title = truncate_utf8($message, 140, TRUE, TRUE, 10);
   $node->uid = $user->uid;
   $node->language = LANGUAGE_NONE;
   $node->body[$node->language][0]['format'] = 'filtered_html';
