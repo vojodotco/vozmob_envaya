@@ -34,7 +34,7 @@ function vozmob_envaya_sms_incoming($op, $number, $message, $options)  {
       if ($file) {
         $field = preg_match('!^image/(gif|jpeg|png)$!', $file->filemime) ? 'field_image' : 'field_file';
         $node->{$field}[$node->language][] = array(
-          'display' => ($file->filemime != 'text/plain' && $file->filemime != 'application/smil'),
+          'display' => (int) ($file->filemime != 'text/plain' && $file->filemime != 'application/smil'),
           'fid' => $file->fid,
           'filename' => $file->filename,
           'filemime' => $file->filemime,
